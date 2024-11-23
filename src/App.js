@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
 import Duck from './Duck';
+import quackSound from './quack.mp3'; // Import the audio file
 import './App.css';
 
 function App() {
@@ -14,10 +15,12 @@ function App() {
   });
   const [output, setOutput] = useState('');
 
+  // Handle form input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Create the Duck object
   const handleCreateDuck = () => {
     const { name, color, age, weight, image } = formData;
     if (!name || !color || !age || !weight || !image) {
@@ -35,6 +38,7 @@ function App() {
     });
   };
 
+  // Show the Duck's details
   const handleShow = () => {
     setOutput('');
     if (duck) {
@@ -42,11 +46,31 @@ function App() {
     }
   };
 
+  // Handle the Quack action
   const handleQuack = () => {
-    setOutput('');
     if (duck) {
-      setOutput(duck.quack());
-      // Sound effect is optional and requires an audio file
+      // Get the quack text from the Duck object
+      const quackText = duck.quack();
+      setOutput(quackText);
+
+      // Play the quack sound 3 times
+      let playCount = 0;
+      const playQuackSound = () => {
+        if (playCount < 3) {
+          const audio = new Audio(quackSound);
+          audio.play().then(() => {
+            playCount++;
+            // Wait for the sound to finish before playing again
+            audio.onended = () => {
+              playQuackSound();
+            };
+          }).catch((error) => {
+            console.error('Error playing audio:', error);
+          });
+        }
+      };
+
+      playQuackSound();
     }
   };
 
@@ -102,7 +126,7 @@ function App() {
       {output && (
         <div>
           <p>{output}</p>
-          {duck.image && <img src={duck.image} alt="Duck" />}
+          {duck && duck.image && <img src={duck.image} alt="Duck" />}
         </div>
       )}
     </div>
